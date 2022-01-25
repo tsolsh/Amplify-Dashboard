@@ -41,7 +41,7 @@ const actions = {
 
   async loadCurrentUser ({ commit }, { user }) {
     if (!user) return;
-    // if (na!= state.currentId)
+    // if (na!= state.currentId) 
       commit('setCurrentUser', { user });
   },
 
