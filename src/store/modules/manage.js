@@ -49,6 +49,7 @@ const actions = {
     const res = await api('patient/add','put', fields);
     commit('setPatients', res.data)
   },
+
   async patSessions ({commit}, {pid}) {
     const res = await api('patient/get_sessions/'+pid);
     commit('setPatSessions',res.data);
@@ -57,7 +58,7 @@ const actions = {
   async disablePatient ({ commit }, {ses_id, p_id, switchOff}) {
     const res = await api('/patient/disable/'+ ses_id +'/'+ p_id +'/'+ switchOff);
     // console.log(state.currentId);
-    commit('setPolyDetails', res.data);
+    commit('setPatients', res.data);
   },
 
   async setUnits ({ state }, {units}) {
@@ -138,6 +139,7 @@ const actions = {
     const res = await api('gw/update','put', gw);
     commit('setGateways', res.data)
   },
+
   async loadGwPolys ({commit }) {
     const res = await api('gw/activePolys');
     commit('setGwPolys', res.data)

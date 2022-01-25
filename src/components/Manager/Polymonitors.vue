@@ -12,13 +12,15 @@
             dense size="15px" flat
             :icon="'edit'" style="color:var(--action);">
           </q-btn>
-          <q-btn 
+          <!-- <q-btn 
             class="q-my-sm" id="edit_select" 
             @click.prevent="" 
             :disabled="true"
             dense size="15px" flat
-            icon="delete" style="color:var(--action);margin-left:10px;">
-          </q-btn>
+            icon="remove_circle" :color="patientEnabled ? 'grey-8' : 'yellow'">
+          </q-btn> -->
+
+          <q-btn @click="disable_pop = true" icon="remove_circle" dense flat :color="true ? 'grey-8' : 'yellow-7'" id="Patients_enabled" disabled/>
         </div>
       </div>
 
@@ -39,6 +41,7 @@
         <tr v-if="currPoly.signal">
           <th>Signal:</th>
           <td>
+
             <table border="1">
               <thead>
                 <th>Gateway</th>
@@ -51,6 +54,37 @@
                 <td>{{showTime(v.ts)}}</td>
               </tr>
             </table>
+
+
+            <!-- <div class="q-ps-md">
+              <q-table
+                :rows="rows"
+                :columns="[
+                {name: 'gateway', label: 'Gateway', align: 'center', field: row => row.name, format: val => `${val}`, sortable: true},
+                {name: 'rssi', label: 'RSSI', align: 'center', field: row => row.name, format: val => `${val}`, sortable: true},
+                {name: 'time', label: 'Time', align: 'center', field: row => row.name, format: val => `${val}`, sortable: true},]"
+                row-key="name"
+              >
+                <template #body-cell-gateway="props">
+                  <q-td key="gateway" :props="props">
+                    <router-link :to="{ name: 'mngGateways', query: {id: props.row.gateway} }">{{gw(props.row.gateway)}}</router-link>
+                  </q-td>
+                </template>
+
+                <template #body-cell-rssi="props">
+                  <q-td key="rssi" :props="props">
+                    {{props.row.rssi}}
+                  </q-td>
+                </template>
+
+                <template #body-cell-time="props">
+                  <q-td key="time" :props="props">
+                    {{showTime(props.row.time)}}
+                  </q-td>
+                </template>
+              </q-table>
+            </div> -->
+
           </td>
         </tr>
         <tr><th>Added:</th><td>{{showTime(currPoly.ts)}}</td></tr>
@@ -269,7 +303,29 @@ export default {
       return this.currPolys;
     },
     activePoly(){ return this.$store.state.manage.currentPoly?.name; },
-    activate(){ return this.switched? 'activate':'inactivate'; }
+    activate(){ return this.switched? 'activate':'inactivate'; },
+    rows(){
+      var lst = [];
+      if(!this.currPoly.signal) return lst;
+      for(var i in this.currPoly?.signal) {
+        console.log('i', i);
+        console.table('currPoly.signal', this.currPoly.signal);
+        lst.push(
+          {
+            name: i,
+            gateway: i,
+            rssi: this.currPoly?.signal[i].rssi,
+            time: this.currPoly?.signal[i].ts,
+          }
+        );
+      }
+      return lst;
+      // <tr v-for="(v, k) in currPoly.signal" :key="k">
+      //           <td><router-link :to="{ name: 'mngGateways', query: {id: k} }">{{gw(k)}}</router-link></td>
+      //           <td>{{v.rssi}} dB</td>
+      //           <td>{{showTime(v.ts)}}</td>
+      //         </tr>
+    }
   },
 
   watch:{
@@ -292,7 +348,9 @@ export default {
 
     search_text(){ 
       if(this.search_text == '') this.clearSearch();
-    }
+    },
+
+    rows() { console.table(this.rows);}
   },
 
   mounted: function(){

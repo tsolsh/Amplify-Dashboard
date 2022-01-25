@@ -1,5 +1,4 @@
 import {createRouter, createWebHistory} from 'vue-router' 
-import MainLayout      from '../layouts/MainLayout.vue'
 import Manager      from '../components/Manager/MngMain.vue'
 
 import Sessions     from '../components/Sessions/SesMain.vue'

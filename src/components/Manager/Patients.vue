@@ -5,25 +5,22 @@
       <div class="table_details_header">
         <h3 v-if="currPat.serial" style="color:var(--bg-4);">Patient {{currPat?.serial}} <q-icon name="badge" color="secondary"/></h3>
         <div v-if="currPat.serial">
-        <q-btn 
-          class="q-my-sm" id="edit_select" 
-          @click.prevent="editPatBtn()" 
-          :disabled="inSession"
-          dense size="15px" flat
-          :icon="'edit'" style="color:var(--action);">
-        </q-btn>
-        <q-btn 
-          class="q-my-sm" id="edit_select" 
-          @click.prevent="" 
-          :disabled="inSession"
-          dense size="15px"  flat
-          :icon="'delete'" style="color:var(--action);margin-left:10px;">
-        </q-btn>
+          <q-btn 
+            class="q-my-sm" id="edit_select" 
+            @click.prevent="editPatBtn()" 
+            :disabled="inSession"
+            dense size="15px" flat
+            :icon="'edit'" style="color:var(--action);">
+          </q-btn>
+          
+          <q-btn @click="disable_pop = true" icon="remove_circle" dense flat :color="patientEnabled ? 'grey-8' : 'yellow-7'" id="Patients_enabled" :disabled="inSession">
+            <q-tooltip class="bg-secondary text-white" anchor="top middle" self="bottom middle">
+              {{patientEnabled? 'Disable':'Enable'}} patient
+            </q-tooltip>
+          </q-btn>
         
-        <!-- <span class="text-black" anchor="top middle" self="bottom middle"> -->
           <span v-if="inSession"> Can't edit patient <router-link :to="{ name: 'tabConfiguration', params: { id: inSession.id } }" class="text-secondary">in session</router-link>
-          <!-- </span> -->
-        </span>
+          </span>
         </div>
       </div>
 
@@ -101,17 +98,36 @@
               <div v-if="currid" style="display: flex;align-items: baseline;font-weight:700;">
                 <!-- <label for="Patients_enabled">Active:</label> -->
                 <!-- <input id="Patients_enabled" type="checkbox" v-model="patientEnabled"/> -->
-                <q-toggle v-model="patientEnabled" @update:model-value="disPatDetails()" label="Active" left-label color="yellow-8" id="Patients_enabled"/>
+                <!-- <q-toggle v-model="patientEnabled" @update:model-value="disPatBtn()" label="Active" left-label color="yellow-8" id="Patients_enabled"/> -->
               </div>
             </tr>
           </table>
 
           <form class="edit_input" id="edit_form">
             <div class="update_loc">
-            <q-btn label="Save" type="submit" id="Patients_saveNewPat" @click.prevent="addNewPat()" text-color="white" color="accent" dense no-caps/>
-            <q-btn label="Cancel" type="submit" id="Patients_Cancel" class="cancelBtn" @click.prevent="cancleBtn()" color="white" text-color="accent" flat dense no-caps/>
+              <q-btn label="Save" type="submit" id="Patients_saveNewPat" @click.prevent="addNewPat()" text-color="white" color="accent" dense no-caps/>
+              <q-btn label="Cancel" type="submit" id="Patients_Cancel" class="cancelBtn" @click.prevent="cancleBtn()" color="white" text-color="accent" flat dense no-caps/>
             </div>
           </form> 
+        </q-card>
+      </q-dialog>
+
+      <!-- disable popup -->
+      <q-dialog v-model="disable_pop">
+        <q-card class="bg-primary text-white">
+          <q-card-actions align="right" class="bg-primary">
+            <q-btn icon="close" flat round dense v-close-popup style="padding: inherit;"/>
+          </q-card-actions>
+
+          <q-card-section class="text-h5 bg-primary q-mb-xl q-pa-md">
+            {{patientEnabled? 'Disable':'Enable'}} patient {{currPat?.serial}} ?
+          </q-card-section>
+
+          <div class="update_loc">
+            <q-btn label="Yes" type="submit" id="Patients_saveNewPat" @click.prevent="disablePatient()" text-color="white" color="accent" dense no-caps/>
+            <q-btn label="No" type="submit" id="Patients_Cancel" class="cancelBtn" @click.prevent="disable_pop=false" text-color="white" color="accent" flat dense no-caps>
+            </q-btn>
+          </div>
         </q-card>
       </q-dialog>
         
@@ -259,6 +275,7 @@ export default {
       new_height: '',
       currid: null,
       action: null,
+      disable_pop : false,
       problems: {
         serial: null,
         birthdate: null,
@@ -423,16 +440,6 @@ export default {
     },
 
     addNewPat(){ //async?
-      if(this.clicked == 'disable_btn'){
-        var switchOff = !this.patientEnabled;
-        var p_id = this.currid;
-        for(var i in this.sessions){
-          var ses_id = this.sessions[i].id;
-          this.$store.dispatch('manage/disablePatient',{ses_id,p_id, switchOff});
-        }
-        this.currPat.disabled = switchOff;
-      }
-
       if(this.fields['serial']) {
         for(var i in this.patients){
           if(this.patients[i] == null) { continue; }
@@ -509,19 +516,23 @@ export default {
       // this.currid = this.current = this.currPat = '' ;
     },
 
-    disPatDetails(){
-      this.clicked = 'disable_btn';
-    },
+    // disPatBtn(){
+    //   this.clicked = 'disable_btn';
+    // },
 
-    // checkSwitch(){
-    //   for (var i in this.sessions){
-    //     if(this.sessions[i].status && this.sessions[i].status == 99){
-    //       return false;
-    //     }else{
-    //       return true;
-    //     }
-    //   }
-    // }
+    disablePatient(){
+      // if(this.clicked == 'disable_btn'){
+        var switchOff = this.patientEnabled;
+        var p_id = this.currid;
+        for(var i in this.sessions){
+          var ses_id = this.sessions[i].id;
+          this.$store.dispatch('manage/disablePatient',{ses_id,p_id, switchOff});
+        }
+        this.patientEnabled = !this.patientEnabled;
+        this.currPat.disabled = this.patientEnabled;
+        this.disable_pop = false;
+      // }
+    }
   }
 
 }

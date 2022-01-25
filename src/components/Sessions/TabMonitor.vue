@@ -77,7 +77,7 @@
             Back to calibrate
           </q-tooltip>
         </q-btn>
-        <q-btn v-if="currentSession?.status<99" @click="archiveSession($event)" color="secondary" icon="archive" class="icon delete" id="Nav_archive-button" :disable="!currentSession || isLive!=0" dense no-caps>
+        <q-btn v-if="currentSession?.status<99" @click="archiveSession($event)" color="secondary" icon="archive" class="icon delete" id="Nav_archive-button" :disable="!currentSession || isLive" dense no-caps>
           <!-- <svg><use href="../../assets/img/i.svg#stageFinished" :disable="!currentSession || isLive"/></svg> -->
           <q-tooltip v-if="deleteMsg" class="shadow-3 bg-secondary text-white" anchor="top middle" self="bottom middle" id="deleteTxt">
             Archive
@@ -280,8 +280,7 @@ export default {
     },
 
     checkPermissions() {
-      console.log('in checkPermissions');
-      console.info('perms:' , this.perms);
+      
       if(this.perms.includes('user-group') || this.perms.includes('EditSessions')|| this.perms.includes('ManageSessions')|| this.perms.includes('ManageDevices')) {
         return 'admin';
       } 

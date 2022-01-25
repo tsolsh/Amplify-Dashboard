@@ -58,18 +58,23 @@
                 <q-icon name="room_preferences" color="secondary"/>
                 {{ward.name}}
               </q-item-section>
-              <q-item-section v-show="activeWard===ward.name" style="display: grid;align-items: center;">
+              <q-item-section v-show="activeWard===ward.name" style="display: flex; flex-direction: row; justify-content: flex-end;">
                 <q-btn v-show="activeWard===ward.name" clickable :icon="'add'"
                   class="bg-accent text-white q-my-sm" @click="add_room_pop=true,activeRoom=''" 
                   round dense size="11px" :disabled="disable" 
-                  id="Location_addWardBtn" style="padding:0px;align-items: center; ">
+                  id="Location_addWardBtn" style="margin-right: 10px;">
                   <q-tooltip class="bg-secondary text-white" anchor="top middle" self="bottom middle">
                     Add room
                   </q-tooltip>
                 </q-btn>
-                <q-btn @click="edit_ward_pop = true" flat dense rounded icon="edit" size="sm" style="right: 20%; position: absolute;">
-                  <q-tooltip class="bg-green-8 text-white" anchor="top middle" self="bottom middle">
+                <q-btn @click="edit_ward_pop = true" flat dense rounded icon="edit" size="sm" style="margin-right: 10px;">
+                  <q-tooltip class="bg-accent text-white" anchor="top middle" self="bottom middle">
                     Edit ward
+                  </q-tooltip>
+                </q-btn>
+                <q-btn v-show="activeWard===ward.name" @click="disable_pop = true" icon="remove_circle" :color="wardEnabled ? 'grey-8' : 'yellow-7'" id="Locations_enabled" flat dense>
+                  <q-tooltip class="bg-secondary text-white" anchor="top middle" self="bottom middle">
+                    {{wardEnabled? 'Disable':'Enable'}} ward
                   </q-tooltip>
                 </q-btn>
               </q-item-section>
@@ -85,7 +90,7 @@
                 </q-item-section>
                 <q-item-section>
                   <q-btn @click="edit_room_pop = true" flat dense rounded icon="edit" size="sm" style="right: 20%; position: absolute;">
-                    <q-tooltip class="bg-green-8 text-white" anchor="top left" self="bottom middle">
+                    <q-tooltip class="bg-accent text-white" anchor="top left" self="bottom middle">
                       Edit room
                     </q-tooltip>
                   </q-btn>
@@ -101,7 +106,7 @@
                 </q-item-section>
                 <q-item-section>
                   <q-btn @click="edit_bed_pop = true" flat dense rounded icon="edit" size="sm" style="right: 0; position: absolute;">
-                    <q-tooltip class="bg-green-8 text-white" anchor="top left" self="bottom middle">
+                    <q-tooltip class="bg-accent text-white" anchor="top left" self="bottom middle">
                       Edit bed
                     </q-tooltip>
                   </q-btn>
@@ -125,7 +130,7 @@
               <q-input :placeholder="activeWard" name="ward" v-model.trim="newWard" id="Location_newWard" :class="{problem: problems.newWard}" bg-color="brown-1" filled dense/>
               <span class="required">{{problems.newWard}}</span>
             </label>
-            <q-toggle class="q-mt-xl" v-model="wardEnabled" label="Active" @update:model-value="disLocDetails()" left-label color="yellow-8" id="Locations_enabled" size="30px" style="font-size: 20px;"/>
+            <!-- <q-toggle class="q-mt-xl" v-model="wardEnabled" label="Active" @update:model-value="disLocDetails()" left-label color="yellow-8" id="Locations_enabled" size="30px" style="font-size: 20px;"/> -->
           </q-card-section>
           <div class="buttons">
             <q-btn label="Save" type="submit" @click="saveWard" id="Location_saveWard" text-color="white" color="accent" dense no-caps/>
@@ -310,6 +315,24 @@
         </form>
       </div>
 
+      <!-- disable popup -->
+      <q-dialog v-model="disable_pop">
+        <q-card class="bg-primary text-white">
+          <q-card-actions align="right" class="bg-primary">
+            <q-btn icon="close" flat round dense v-close-popup style="padding: inherit;"/>
+          </q-card-actions>
+
+          <q-card-section class="text-h5 bg-primary q-mb-xl q-pa-md">
+            {{wardEnabled? 'Disable':'Enable'}} {{activeWard}} ?
+          </q-card-section>
+
+          <div class="buttons">
+            <q-btn label="Yes" type="submit" id="Patients_saveNewPat" @click.prevent="disLocDetails()" text-color="white" color="accent" dense no-caps/>
+            <q-btn label="No" type="submit" id="Patients_Cancel" class="cancelBtn" @click.prevent="disable_pop=false" text-color="white" color="accent" flat dense no-caps/>
+          </div>
+        </q-card>
+      </q-dialog>
+
     </form>
   </div>
 </div>
@@ -341,6 +364,7 @@ export default {
       clicked: '',
       filterDisable: false,
       disable: false,
+      disable_pop: false,
       activeWard: '',
       activeRoom: '',
       newWard: '',
@@ -531,14 +555,8 @@ export default {
     },
 
     saveWard(e){
-      if(this.clicked == 'disable_btn'){
-        var dis = !this.wardEnabled;
-        var ward = this.activeWard;
-        this.$store.dispatch('locations/disableWard', {ward, dis}); 
-        this.fullWards.find(w => w.name === this.activeWard)['disabled'] = dis;
-        this.saved_popup = true;
-      }
-      else{
+     
+      // else{
         if(this.newWard){
           for(var i in this.wards){
             if(this.newWard == this.wards[i].name){
@@ -551,7 +569,7 @@ export default {
           var wards={ old: this.activeWard, new: this.newWard };
           this.$store.dispatch('locations/saveWard', wards);
         }
-      }
+      // }
       this.edit_ward_pop=false;
       this.saved_popup = true;
       this.cancelBtn(e);
@@ -603,8 +621,16 @@ export default {
     },
 
     disLocDetails(){
-      this.popupDisable = true;
-      this.clicked = 'disable_btn';
+      // this.popupDisable = true;
+      // this.clicked = 'disable_btn';
+      //  if(this.clicked == 'disable_btn'){
+        var dis = this.wardEnabled;
+        var ward = this.activeWard;
+        this.$store.dispatch('locations/disableWard', {ward, dis}); 
+        this.fullWards.find(w => w.name === this.activeWard)['disabled'] = dis;
+        this.wardEnabled = !this.wardEnabled;
+        this.disable_pop = false;
+      // }
     },
 
     editRoomBtn(name){
