@@ -1,13 +1,13 @@
 <template>
   <q-layout view="lHh Lpr lFf" container id="layout2" class="q-pa-xl shadow-2 rounded-borders" style="height: 900px;position:relative;">
     <q-header bordered elevated style="background:var(--nav) !important;height: 88px;">
-      <q-toolbar>
+      <q-toolbar >
       <q-btn
         flat dense round icon="menu_open"
         aria-label="Menu" size="15px"
         @click="drawer = !drawer, rotate = !rotate"
         :class="rotate? 'rotate-180': ''"
-        style="color:var(--text);margin-right:8px;"
+        style="color:var(--text);margin-right:8px;position: absolute;left: 10px;"
       />
       <NavWiz/>
       </q-toolbar>
@@ -109,8 +109,9 @@ export default {
 <style scoped>
 .row {
   display: flex;
-  align-items: baseline;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
 }
 
 input{

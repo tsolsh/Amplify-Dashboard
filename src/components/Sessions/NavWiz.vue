@@ -1,27 +1,17 @@
 <template>
-  <div class="nav-wizard">
-    <ul>
-      <li class="nav-step">
-        <q-btn flat no-caps tag="button" :to="`/session/${$route.params.id}/configure`" :disable="!currentSession" id="Nav_configureTab" class="icon" :class="{'activeTab': checkActive('configure')}">
-          <svg><use :href="confSvg"/></svg>
-          <span>Configure</span>
-        </q-btn>
-      </li>
-        <!-- <li :class="activeBar!=''? 'bar bar-left active':'bar bar-left'"></li> -->
-      <li class="nav-step" >
-        <q-btn flat no-caps tag="button" :to="`/session/${$route.params.id}/calibrate`" :disable="currentSession?.status<20 || !currentSession" id="Nav_calibrateTab" class="icon" :class="{'activeTab': checkActive('calibrate')}">
-          <svg><use :href="calSvg"/></svg><span>Calibrate</span>
-        </q-btn>
-      </li>
-        <!-- <li :class="activeBar=='both'? 'bar bar-right active':'bar bar-right'"></li> -->
-      <li class="nav-step">
-        <q-btn flat no-caps tag="button" :to="`/session/${$route.params.id}/monitor`" :disable="currentSession?.status!=30" id="Nav_monitorTab" class="icon" :class="{'activeTab': checkActive('monitor')}">
-          <svg><use :href="monSvg"/></svg>
-          <span>Monitor</span>
-        </q-btn>
-      </li>
-    </ul>
+  <div class="q-pa-md">
+    <div class="q-gutter-y-sm">
+      <q-tabs
+        v-model="activeTab"
+        class="text-primary nav-wizard" align="justify"
+      >
+        <q-route-tab name="configure" label="Configure" :icon="'svguse:'+confSvg" :to="`/session/${$route.params.id}/configure`" :disable="!currentSession" id="Nav_configureTab" no-caps></q-route-tab>
+        <q-route-tab name="calibrate" label="Calibrate" :icon="'svguse:'+calSvg" :to="`/session/${$route.params.id}/calibrate`" :disable="currentSession?.status<20 || !currentSession" id="Nav_calibrateTab" no-caps></q-route-tab>
+        <q-route-tab name="monitor" label="Monitor" :icon="'svguse:'+monSvg" :to="`/session/${$route.params.id}/monitor`" :disable="currentSession?.status!=30" id="Nav_monitorTab"  no-caps></q-route-tab>
+      </q-tabs>
+    </div>
   </div>
+  
 </template>
 
 
@@ -41,12 +31,13 @@ export default {
       monSvg: svgimg+'#stageMonitoring',
       disCalTab:true,
       disMonTab: true,
-      active: '',
+      // activeTab: '',
       activeBar:'',
       pop: false,
       lastLast: 0,
       pathId: null,
       ignoreTab: false,
+      activeTabData: '',
     }
   },
   
@@ -60,6 +51,25 @@ export default {
     sessionList() { return this.$store.state.sessions.all; },
     settings(){ return this.$store.state.sessions.settings; },
     isLive() {return this.lastLast + 9999 > this.clock.valueOf(); },
+    activeTab2(){  
+      switch(this.currentSession?.status){
+        case 10: return 'configure';
+        case 20: return 'calibrate'
+        default:
+          return 'monitor'; 
+      }
+    },
+    activeTab: {  
+      get: function(){
+        var path = this.$route.path;
+        path = path.split('/');
+        return this.activeTabData ? this.activeTabData : path[path.length-1];
+      },
+      set: function(value){
+        this.activeTabData = value;
+      },
+      
+    },
   },
 
   watch:{
@@ -74,21 +84,22 @@ export default {
           this.pathId = this.$route.params.id
         }
       },
+      activeTab(){  this.checkActive();}
     },
 
-    currentSession(){
-      // this.pathId = this.$route.params.id;
-      if(!this.ignoreTab) {
-        this.disCalTab=this.currentSession?.status<20;
-        this.disMonTab= this.currentSession?.status<30;
-        switch(this.currentSession?.status){
-          case 10: this.active = 'configure'; this.activeBar=''; break;
-          case 20: this.active = 'calibrate'; this.activeBar='left'; break;
-          default:
-            this.active = 'monitor'; this.activeBar='both'; break;  
-        }
-      }
-    },
+    // currentSession(){
+    //   // this.pathId = this.$route.params.id;
+    //   if(!this.ignoreTab) {
+    //     this.disCalTab=this.currentSession?.status<20;
+    //     this.disMonTab= this.currentSession?.status<30;
+    //     switch(this.currentSession?.status){
+    //       case 10: this.activeTab = 'configure'; this.activeBar=''; break;
+    //       case 20: this.activeTab = 'calibrate'; this.activeBar='left'; break;
+    //       default:
+    //         this.activeTab = 'monitor'; this.activeBar='both'; break;  
+    //     }
+    //   }
+    // },
     last() { this.lastLast = this.clock.valueOf(); },
   },
 
@@ -135,7 +146,7 @@ export default {
 
 <style>
 .nav-wizard {
-  width: 100%;
+  /* width: 100%; */
   display:flex;
   justify-content: space-between;
   align-items:center;
@@ -147,7 +158,7 @@ export default {
   }
 }
 
-.nav-wizard ul {
+/*.nav-wizard ul {
   padding: 0;
   display: flex;
   flex: 3;
@@ -155,7 +166,7 @@ export default {
   align-items: center;
 }
 
-.nav-wizard li {
+ .nav-wizard li {
   list-style: none;
   flex-grow: 4;
   text-align-last: center
@@ -164,6 +175,13 @@ export default {
 .nav-wizard :is(.nav-delete, .nav-end) {
   text-align: center;
   flex:0;
+} */
+
+.q-tabs__content--align-justify .q-tab {
+    flex: 1 1 auto;
+    height: 71px;
+    padding: 0px 100px;
+
 }
 
 .q-dialog__inner > .q-card > .q-card__actions .q-btn--rectangle {
@@ -232,7 +250,7 @@ export default {
   display: none;
 } */
 
-.icon.active > svg ,.router-link-active.icon > svg{
+svg {
   filter: drop-shadow(0 0 1ex var(--bg));
 }
 
